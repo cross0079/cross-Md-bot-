@@ -6,17 +6,19 @@ const pino = require('pino')
 const chalk = require('chalk')
 
 // ==== CONFIG FROM RENDER ENV VARS ====
-const TG_TOKEN = process.env.TELEGRAM_TOKEN // add this in Render
+const TG_TOKEN = process.env.TELEGRAM_TOKEN // 8729900263:AAFwHtPqn7Rlz3JMXS12eH_fHH5RSLQkuvg
+const TG_OWNER_ID = process.env.TG_OWNER_ID // 7809173576
 const OWNER = '༄𝐌𝐑.𝐂𝐑𝐎𝐒'
-const CREDIT = '𝐌𝐑.𝐂𝐑𝐎𝐒𝐓𝐄𝐂𝐇' 
+const CREDIT = '𝐌𝐑.𝐂𝐑𝐎𝐒𝐓𝐄𝐂𝐇'
 const PORT = process.env.PORT || 3000
 
+// [FIXED] No more syntax error here
 const BANNER = `
 ╭━━━〔 CROSS 〕━━━⬣
 ┃『CROSS〆 𝘾̷𝙍̷𝙊̷𝙎̷𝙎̷ 𝙈̷𝘿̷ 𝘽̷𝙤̷𝙩̷ ☠️』
 ┣━━━━━━━━⬣
-┃『Owner : ${mr cross』
-┃『Credit: $mr cross tech』
+┃『Owner : ${OWNER}』
+┃『Credit: ${CREDIT}』
 ╰━━━〔 ☠️ 〕━━━⬣
 `
 console.log(chalk.magenta(BANNER))
@@ -27,18 +29,19 @@ app.get('/', (req,res) => res.send('CROSS MD is running'))
 app.listen(PORT, () => console.log(chalk.green(`Web: ${PORT}`)))
 
 // ==== TELEGRAM BOT ====
-const bot = new TelegramBot(TG_TOKEN, { polling: true })
+const bot = new TelegramBot(TG_TOKEN, { polling: true }) // <-- Uses token from.env
 let sockGlobal = null
 
 bot.onText(/\/pair (.+)/, async (msg, match) => {
   const chatId = msg.chat.id
   const number = match[1].replace(/[^0-9]/g, '')
-  
+
   if(!sockGlobal) return bot.sendMessage(chatId, 'Bot is restarting... wait 5s and try again')
-  
+
   try {
     const code = await sockGlobal.requestPairingCode(number)
-    bot.sendMessage(chatId, `*CROSS MD Pair Code*\n\nNumber: +${number}\nCode: \`\`${code}\`\n\nEnter this on WhatsApp > Link a Device`, { parse_mode: 'Markdown' })
+    const formatted = code?.match(/.{1,4}/g)?.join("-") || code
+    bot.sendMessage(chatId, `*CROSS MD Pair Code*\n\nNumber: +${number}\nCode: \`\`${formatted}\`\n\nEnter this on WhatsApp > Link a Device`, { parse_mode: 'Markdown' })
   } catch(e) {
     bot.sendMessage(chatId, `Error: ${e.message}`)
   }
@@ -57,7 +60,7 @@ async function startBot() {
         logger: pino({ level: 'silent' }),
         auth: state,
         browser: Browsers.macOS('CROSS MD'),
-        printQRInTerminal: false // we use pairing now
+        printQRInTerminal: false
     })
     sockGlobal = sock
 
@@ -65,11 +68,11 @@ async function startBot() {
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update
         if(connection === 'close') {
-            const shouldReconnect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
+            const shouldReconnect = (lastDisconnect.error)?.output?.statusCode!== DisconnectReason.loggedOut
             if(shouldReconnect) startBot()
         } else if(connection === 'open') {
             console.log(chalk.green('✅ CROSS MD WhatsApp Connected'))
-            bot.sendMessage(process.env.TG_OWNER_ID, '✅ CROSS MD is Online on WhatsApp') // optional
+            if(TG_OWNER_ID) bot.sendMessage(TG_OWNER_ID, '✅ CROSS MD is Online on WhatsApp')
         }
     })
 }
