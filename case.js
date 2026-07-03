@@ -2,10 +2,10 @@
 ╭━━━〔 CROSS 〕━━━⬣
 ┃『CROSS〆 𝘾̷𝙍̷𝙊̷𝙎̷𝙎̷ 𝙈̷𝘿̷ 𝘽̷𝙤̷𝙩̷ ☠️』
 ┣━━━━━━━━⬣
-┃『死神 • 𝙊̷𝙬̷𝙣̷𝙚̷𝙧̷ : ༄𝐌𝐑.𝐂𝐑𝐎𝐒𝐒』
+┃『死神 • 𝙊̷𝙬̷𝙣̷𝙚̷𝙧̷ : ༄𝐌𝐑.𝐂𝐑𝐎𝐒』
 ┃『黒龍 • 𝙏̷𝙮̷𝙥̷𝙚̷ : 𝘾̷𝙖̷𝙨̷𝙚̷』
 ┃『闇ノ • 𝙏̷𝙮̷𝙥̷𝙚̷ : 𝘽̷𝙪̷𝙩̷𝙩̷𝙤̷𝙣̷𝙨̷』
-┃『零式 • 𝘾̷𝙧̷𝙚̷𝙙̷𝙞̷𝙩̷ : 𝐌𝐑.𝐂𝐑𝐎𝐒𝐒𝐓𝐄𝐂𝐇』
+┃『零式 • 𝘾̷𝙧̷𝙚̷𝙙̷𝙞̷𝙩̷ : 𝐌𝐑.𝐂𝐑𝐎𝐒𝐓𝐄𝐂𝐇』
 ┣━━━━━━━━⬣
 ┃『月読 • 𝘾̷𝙝̷𝙖̷𝙣̷𝙣̷𝙚̷𝙡̷』
 ┃ https://t.me/mr_crosstech
@@ -16,6 +16,7 @@ const path = require("path");
 const settings = require("./config");
 const { Reply, sendInteractive, sendCarousel, React, typing } = require("./helper/func");
 const { readJSON, isPremium, uptime, formatBytes } = require("./helper/utils");
+const ai = require("./ai"); // <-- CROSS AI
 
 // ── Rent sessions DB ──
 const RENT_DB = "./database/rentsessions.json";
@@ -72,7 +73,7 @@ async function handleMessage(sock, m) {
     const needAdmin = () => { if (!isAdmin &&!isOwner) { Reply(sock, jid, "❌ Admins only.", m); return true; } return false; };
     const needBotAdmin = () => { if (!isBotAdmin) { Reply(sock, jid, "❌ Add bot as group admin first.", m); return true; } return false; };
 
-    console.log(`[CROSS] ${senderNum} →.${command}${text? " " + text : ""}`);
+    console.log(`[CROSS] ${senderNum} →.${command}${text? " + text : ""}`);
     await typing(sock, jid);
 
     switch (command) {
@@ -83,7 +84,7 @@ async function handleMessage(sock, m) {
         await sendCarousel(sock, jid, [
           {
             title: "⚡ GENERAL",
-            body: `> ┏━━━━━━━━━━━━━━\n> ┃༆ ping\n> ┃༆ info\n> ┃༆ owner\n> ┃༆ runtime\n> ┗━━━━━━━━━━━━━━━─`,
+            body: `> ┏━━━━━━━━━━━━━━\n> ┃༆ ping\n> ┃༆ info\n> ┃༆ owner\n> ┃༆ runtime\n> ┃༆ gpt\n> ┃༆ gemini\n> ┃༆ page\n> ┗━━━━━━━━━━━━━━━─`,
             btnLabel: "📢 CHANNEL", btnUrl: settings.telegramChannel,
           },
           {
@@ -320,6 +321,23 @@ async function handleMessage(sock, m) {
         saveRentDB(rentDB);
         await React(sock, m, "✅");
         await sendInteractive(sock, jid, { header: "🤖 CROSS Rent Bot", title: "Session Created", body: `✅ CROSS Session for *+${rentNum}*\n📁 session/rent_${rentNum}\n📄 database/rent_${rentNum}.json\n\nRestart to load.`, footer: settings.footerText, btnLabel: "📢 Channel", btnUrl: settings.telegramChannel }, m);
+        break;
+      }
+
+      // ═══════════════ CROSS AI ═══════════════
+      case "gpt":
+      case "gemini": {
+        return await ai(sock, jid, m);
+      }
+
+      case "page":
+      case "ad": {
+        await sendInteractive(sock, jid, {
+          header: "☠️ CROSS MD AD",
+          title: "Get CROSS MD Bot",
+          body: `🤖 *CROSS MD* - The Fastest WhatsApp Bot 2026\n\n✨ AI, Sticker, Downloader, Anti-Delete & More\n👑 *Owner:* ${settings.ownerName}\n📢 *Channel:* ${settings.telegramChannel}`,
+          footer: settings.footerText, btnLabel: "📢 Join Channel", btnUrl: settings.telegramChannel,
+        }, m);
         break;
       }
 
