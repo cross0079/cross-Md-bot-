@@ -17,8 +17,8 @@ const BANNER = `
 ╭━━━〔 CROSS 〕━━━⬣
 ┃『CROSS〆 𝘾̷𝙍̷𝙊̷𝙎̷𝙎̷ 𝙈̷𝘿̷ 𝘽̷𝙤̷𝙩̷ ☠️』
 ┣━━━━━━━━⬣
-┃『Owner : ${OWNER}』
-┃『Credit: ${CREDIT}』
+┃『Owner : ${mr cross』
+┃『Credit: $mr cross 』
 ╰━━━〔 ☠️ 〕━━━⬣
 `
 console.log(chalk.magenta(BANNER))
